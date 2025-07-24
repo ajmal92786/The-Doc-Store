@@ -34,4 +34,42 @@ const createFolder = async (req, res) => {
   }
 };
 
-module.exports = { createFolder };
+const updateFolder = async (req, res) => {
+  try {
+    const { folderId } = req.params;
+    const { name, type, maxFileLimit } = req.body;
+
+    if (!name || typeof name !== "string") {
+      return res
+        .status(400)
+        .json({ message: "Folder name is required and must be a string" });
+    }
+
+    if (!type || !["csv", "img", "pdf", "ppt"].includes(type)) {
+      return res.status(422).json({ message: "Invalid folder type." });
+    }
+
+    if (!maxFileLimit || isNaN(maxFileLimit) || maxFileLimit <= 0) {
+      return res
+        .status(400)
+        .json({ message: "maxFileLimit must be a positive integer." });
+    }
+
+    const updatedFolder = await folderService.updateFolder(folderId, {
+      name,
+      type,
+      maxFileLimit,
+    });
+
+    return res.status(200).json({
+      message: "Folder updated successfully",
+      folder: updatedFolder,
+    });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
+module.exports = { createFolder, updateFolder };
