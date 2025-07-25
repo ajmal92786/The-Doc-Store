@@ -29,4 +29,17 @@ const updateFolder = async (folderId, folderData) => {
   return await folder.save();
 };
 
-module.exports = { createFolder, updateFolder };
+const deleteFolder = async (folderId) => {
+  const folder = await Folder.findByPk(folderId);
+  if (!folder) {
+    const error = new Error("Folder not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  //   const deletedCount = await Folder.destroy({ where: { folderId } });
+  await folder.destroy(); // Deletes this specific folder instance.
+  return true;
+};
+
+module.exports = { createFolder, updateFolder, deleteFolder };

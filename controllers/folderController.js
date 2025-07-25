@@ -72,4 +72,24 @@ const updateFolder = async (req, res) => {
   }
 };
 
-module.exports = { createFolder, updateFolder };
+const deleteFolder = async (req, res) => {
+  try {
+    const { folderId } = req.params;
+
+    if (!folderId) {
+      return res.status(400).json({ message: "Folder ID is required." });
+    }
+
+    await folderService.deleteFolder(folderId);
+
+    return res
+      .status(200)
+      .json({ message: "Folder and associated files deleted successfully" });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
+module.exports = { createFolder, updateFolder, deleteFolder };
