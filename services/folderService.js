@@ -1,4 +1,5 @@
 const Folder = require("../models/Folder");
+const File = require("../models/File");
 
 const createFolder = async ({ name, type, maxFileLimit }) => {
   const existingFolder = await Folder.findOne({ where: { name } });
@@ -42,4 +43,13 @@ const deleteFolder = async (folderId) => {
   return true;
 };
 
-module.exports = { createFolder, updateFolder, deleteFolder };
+const saveFileInDB = async (fileData) => {
+  return await File.create(fileData);
+};
+
+module.exports = {
+  createFolder,
+  updateFolder,
+  deleteFolder,
+  saveFileInDB,
+};
