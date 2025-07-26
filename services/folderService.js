@@ -1,5 +1,6 @@
 const Folder = require("../models/Folder");
 const File = require("../models/File");
+const cloudinary = require("../config/cloudinary");
 
 const createFolder = async ({ name, type, maxFileLimit }) => {
   const existingFolder = await Folder.findOne({ where: { name } });
@@ -14,6 +15,14 @@ const createFolder = async ({ name, type, maxFileLimit }) => {
     type,
     maxFileLimit,
   });
+};
+
+const getFolderByFolderId = async (folderId) => {
+  return Folder.findByPk(folderId);
+};
+
+const getFileByFolderId = async (fileId) => {
+  return File.findByPk(fileId);
 };
 
 const updateFolder = async (folderId, folderData) => {
@@ -43,13 +52,24 @@ const deleteFolder = async (folderId) => {
   return true;
 };
 
+const uploadToCloudinary = async (path, folder, originalname) => {
+  return cloudinary.uploader.upload(path, {
+    resource_type: "auto",
+    folder: `TheDocStore/${folder.name}`,
+    public_id: `${originalname.split(".")[0]}_${Date.now()}`,
+  });
+};
+
 const saveFileInDB = async (fileData) => {
   return await File.create(fileData);
 };
 
 module.exports = {
+  getFolderByFolderId,
+  getFileByFolderId,
   createFolder,
   updateFolder,
   deleteFolder,
   saveFileInDB,
+  uploadToCloudinary,
 };

@@ -1,7 +1,7 @@
-const Folder = require("../models/Folder");
 const File = require("../models/File");
 const folderService = require("../services/folderService");
-const cloudinary = require("../config/cloudinary");
+const fileService = require("../services/fileService");
+
 const fs = require("fs");
 
 const createFolder = async (req, res) => {
@@ -100,19 +100,18 @@ const uploadFile = async (req, res) => {
   try {
     const { folderId } = req.params;
     const { description } = req.body;
+    const { originalname, mimetype, size, path } = req.file;
 
     // Validate folder existence
-    const folder = await Folder.findByPk(folderId);
+    const folder = await folderService.getFolderByFolderId(folderId);
     if (!folder) {
-      return res.status(404).json({ error: "Folder not found" });
+      return res.status(404).json({ error: "Folder does not exist" });
     }
 
     // Check if file is  attached
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-
-    const { originalname, mimetype, size, path } = req.file;
 
     // Normalize common extensions
     const extensionMap = {
@@ -143,11 +142,11 @@ const uploadFile = async (req, res) => {
     }
 
     // Upload to cloudinary
-    const result = await cloudinary.uploader.upload(path, {
-      resource_type: "auto",
-      folder: `TheDocStore/${folder.name}`,
-      public_id: `${originalname.split(".")[0]}_${Date.now()}`,
-    });
+    const result = await folderService.uploadToCloudinary(
+      path,
+      folder,
+      originalname
+    );
     console.log("Uploaded file to cloudinary: ", result);
 
     // Step 5: Delete local file
@@ -177,4 +176,37 @@ const uploadFile = async (req, res) => {
   }
 };
 
-module.exports = { createFolder, updateFolder, deleteFolder, uploadFile };
+const updateFileDescription = async (req, res) => {
+  try {
+    const { folderId, fileId } = req.params;
+    const { description } = req.body;
+
+    // Validate input
+    if (!description || typeof description !== "string") {
+      return res.status(400).json({ message: "Valid description is required" });
+    }
+
+    const updatedFile = await fileService.updateFileDescription({
+      folderId,
+      fileId,
+      description,
+    });
+
+    return res.status(200).json({
+      message: "File description updated successfully",
+      files: updatedFile,
+    });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
+module.exports = {
+  createFolder,
+  updateFolder,
+  deleteFolder,
+  uploadFile,
+  updateFileDescription,
+};
