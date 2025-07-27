@@ -5,6 +5,7 @@ const {
   deleteFolder,
   uploadFile,
   updateFileDescription,
+  deleteFile,
 } = require("../controllers/folderController");
 const upload = require("../middlewares/multerConfig");
 
@@ -24,5 +25,7 @@ folderRoutes.post(
 );
 // Update file description
 folderRoutes.put("/folders/:folderId/files/:fileId", updateFileDescription);
+// Delete file of a specific folder
+folderRoutes.delete("/folders/:folderId/files/:fileId", deleteFile);
 
 module.exports = { folderRoutes };

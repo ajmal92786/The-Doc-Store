@@ -203,10 +203,27 @@ const updateFileDescription = async (req, res) => {
   }
 };
 
+const deleteFile = async (req, res) => {
+  try {
+    const { folderId, fileId } = req.params;
+
+    const result = await fileService.deleteFileById(folderId, fileId);
+
+    return res
+      .status(200)
+      .json({ message: "File deleted successfully.", fileId: result.fileId });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
 module.exports = {
   createFolder,
   updateFolder,
   deleteFolder,
   uploadFile,
   updateFileDescription,
+  deleteFile,
 };
