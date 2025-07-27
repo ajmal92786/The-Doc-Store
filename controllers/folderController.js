@@ -276,13 +276,34 @@ const getSortedFilesInFolder = async (req, res) => {
   try {
     const files = await fileService.getFilesSorted(folderId, sort);
 
-    if (!files) {
-      return res
-        .status(404)
-        .json({ message: "Folder not found or has no files" });
+    if (files.length === 0) {
+      return res.status(404).json({ message: "Folder has no files" });
     }
 
     return res.status(200).json(files);
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
+const getFilesByType = async (req, res) => {
+  const { type } = req.query;
+  if (!type) {
+    return res
+      .status(400)
+      .json({ message: "File type query parameter is required" });
+  }
+
+  try {
+    const files = await fileService.getFilesByType(type);
+
+    if (files.length === 0) {
+      return res.status(404).json({ message: "No files found" });
+    }
+
+    return res.status(200).json({ files });
   } catch (error) {
     return res
       .status(error.statusCode || 500)
@@ -300,4 +321,5 @@ module.exports = {
   getAllFolders,
   getFilesInFolder,
   getSortedFilesInFolder,
+  getFilesByType,
 };

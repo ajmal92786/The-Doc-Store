@@ -9,6 +9,7 @@ const {
   getAllFolders,
   getFilesInFolder,
   getSortedFilesInFolder,
+  getFilesByType,
 } = require("../controllers/folderController");
 const upload = require("../middlewares/multerConfig");
 
@@ -36,5 +37,7 @@ folderRoutes.get("/folders", getAllFolders);
 folderRoutes.get("/folders/:folderId/files", getFilesInFolder);
 // Sort Files by Size or Recency
 folderRoutes.get("/folders/:folderId/filesBySort", getSortedFilesInFolder);
+// Get Files by Type Across Folders
+folderRoutes.get("/files", getFilesByType);
 
 module.exports = { folderRoutes };

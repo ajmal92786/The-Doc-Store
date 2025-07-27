@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const File = require("../models/File");
 const { getFolderByFolderId } = require("./folderService");
 // const cloudinary = require("../config/cloudinary");
@@ -58,11 +59,42 @@ const fetchFilesByFolder = async (folderId) => {
 
 const getFilesSorted = async (folderId, sortField) => {
   const folder = await getFolderByFolderId(folderId);
-  if (!folder) return null;
+  if (!folder) {
+    const err = new Error("Folder not found");
+    err.statusCode = 404;
+    throw err;
+  }
 
   const files = await File.findAll({
     where: { folderId },
     order: [[sortField, "ASC"]],
+  });
+
+  return files;
+};
+
+const getFilesByType = async (typeParam) => {
+  const mimeMap = {
+    pdf: "application/pdf",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ppt: "application/vnd.ms-powerpoint",
+    csv: "text/csv",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+  };
+
+  const mimeType = mimeMap[typeParam?.toLowerCase()];
+  if (!mimeType) {
+    const err = new Error("Unsupported file type");
+    err.statusCode = 400;
+    return err;
+  }
+
+  const files = await File.findAll({
+    where: {
+      type: mimeType,
+    },
   });
 
   return files;
@@ -73,4 +105,5 @@ module.exports = {
   deleteFileById,
   fetchFilesByFolder,
   getFilesSorted,
+  getFilesByType,
 };
