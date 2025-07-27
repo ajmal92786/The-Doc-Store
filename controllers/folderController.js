@@ -219,6 +219,77 @@ const deleteFile = async (req, res) => {
   }
 };
 
+const getAllFolders = async (req, res) => {
+  try {
+    const folders = await folderService.getAllFolders();
+
+    if (folders.length === 0) {
+      return res.status(404).json({ message: "No folders found" });
+    }
+
+    return res.status(200).json(folders);
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
+const getFilesInFolder = async (req, res) => {
+  const { folderId } = req.params;
+  if (!folderId) {
+    return res.status(400).json({ message: "Folder ID is required in params" });
+  }
+
+  try {
+    const files = await fileService.fetchFilesByFolder(folderId);
+
+    if (files.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Folder not found or has no files" });
+    }
+
+    return res.status(200).json(files);
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
+const getSortedFilesInFolder = async (req, res) => {
+  const { folderId } = req.params;
+  const { sort } = req.query;
+
+  if (!folderId) {
+    return res.status(400).json({ message: "Folder ID is required in params" });
+  }
+
+  const validSortFields = ["size", "uploadedAt"];
+  if (!validSortFields.includes(sort)) {
+    return res.status(400).json({
+      error: "Invalid sort field. Only 'size' and 'uploadedAt' are allowed.",
+    });
+  }
+
+  try {
+    const files = await fileService.getFilesSorted(folderId, sort);
+
+    if (!files) {
+      return res
+        .status(404)
+        .json({ message: "Folder not found or has no files" });
+    }
+
+    return res.status(200).json(files);
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
 module.exports = {
   createFolder,
   updateFolder,
@@ -226,4 +297,7 @@ module.exports = {
   uploadFile,
   updateFileDescription,
   deleteFile,
+  getAllFolders,
+  getFilesInFolder,
+  getSortedFilesInFolder,
 };

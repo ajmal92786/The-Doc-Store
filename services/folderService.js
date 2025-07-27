@@ -64,6 +64,10 @@ const saveFileInDB = async (fileData) => {
   return await File.create(fileData);
 };
 
+const getAllFolders = async () => {
+  return await Folder.findAll();
+};
+
 module.exports = {
   getFolderByFolderId,
   getFileByFolderId,
@@ -72,4 +76,5 @@ module.exports = {
   deleteFolder,
   saveFileInDB,
   uploadToCloudinary,
+  getAllFolders,
 };
