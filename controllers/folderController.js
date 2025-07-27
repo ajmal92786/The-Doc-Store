@@ -311,6 +311,28 @@ const getFilesByType = async (req, res) => {
   }
 };
 
+const getFilesMetaData = async (req, res) => {
+  const { folderId } = req.params;
+
+  if (!folderId) {
+    return res.status(400).json({ message: "Folder ID parameter is required" });
+  }
+
+  try {
+    const files = await fileService.getFilesMetaData(folderId);
+
+    if (files.length === 0) {
+      return res.status(404).json({ message: "No files found in this folder" });
+    }
+
+    return res.status(200).json({ files });
+  } catch (error) {
+    return res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Internal Server Error" });
+  }
+};
+
 module.exports = {
   createFolder,
   updateFolder,
@@ -322,4 +344,5 @@ module.exports = {
   getFilesInFolder,
   getSortedFilesInFolder,
   getFilesByType,
+  getFilesMetaData,
 };

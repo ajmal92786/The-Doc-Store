@@ -100,10 +100,25 @@ const getFilesByType = async (typeParam) => {
   return files;
 };
 
+const getFilesMetaData = async (folderId) => {
+  const folder = await getFolderByFolderId(folderId);
+  if (!folder) {
+    const err = new Error("Folder not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  return await File.findAll({
+    where: { folderId },
+    attributes: ["fileId", "name", "size", "description"],
+  });
+};
+
 module.exports = {
   updateFileDescription,
   deleteFileById,
   fetchFilesByFolder,
   getFilesSorted,
   getFilesByType,
+  getFilesMetaData,
 };
